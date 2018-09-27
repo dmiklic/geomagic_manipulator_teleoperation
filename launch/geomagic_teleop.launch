@@ -1,0 +1,18 @@
+<launch>
+  <arg name="robot_name"/>
+  <arg name="geomagic_pose"/>
+  <arg name="geomagic_button"/>
+
+  <node name="$(arg robot_name)_geomagic_teleop"
+        pkg="geomagic_manipulator_teleoperation"
+        type="geomagic_manipulator_teleoperation">
+    <rosparam file="$(find
+                    geomagic_manipulator_teleoperation)/params/$(arg
+                    robot_name).yaml"/>
+    <remap from="geomagic_pose" to="$(arg geomagic_pose)"/>
+    <remap from="geomagic_button" to="$(arg geomagic_button)"/>
+    <remap from="robot_pose" to="$(arg robot_name)_pose"/>
+    <remap from="robot_gripper" to="$(arg robot_name)_gripper"/>
+  </node>
+
+</launch>

@@ -10,6 +10,13 @@
 
 using std::string;
 
+//! Clamp value
+template <typename T>
+T clamp(const T&x, const T& lower, const T& upper)
+{
+  return std::max(lower, std::min(x, upper));
+}
+
 class GeomagicManipulatorTeleoperation
 {
 public:
@@ -31,6 +38,10 @@ private:
   ros::Subscriber sub_pose_, sub_button_;
   ros::Publisher pub_pose_, pub_gripper_;
 
+  double x_offset_, y_offset_, z_offset_;
+  double x_scale_, y_scale_, z_scale_;
+  double x_min_, y_min_, z_min_;
+  double x_max_, y_max_, z_max_;
   std_msgs::Int32MultiArray gripper_msg_;
   
 };
@@ -39,11 +50,22 @@ GeomagicManipulatorTeleoperation::GeomagicManipulatorTeleoperation()
   : nh_private_("~")
 {
   // Get parameters from the parameter server
-  //nh_private_.param<double>("wheelbase", L_, 1.0);
+  nh_private_.param<double>("x_offset", x_offset_, 1.0);
+  nh_private_.param<double>("y_offset", y_offset_, 1.0);
+  nh_private_.param<double>("z_offset", z_offset_, 1.0);
+  nh_private_.param<double>("x_scale", x_scale_, 1.0);
+  nh_private_.param<double>("y_scale", y_scale_, 1.0);
+  nh_private_.param<double>("z_scale", z_scale_, 1.0);
+  nh_private_.param<double>("x_min", x_min_, 1.0);
+  nh_private_.param<double>("y_min", y_min_, 1.0);
+  nh_private_.param<double>("z_min", z_min_, 1.0);
+  nh_private_.param<double>("x_max", x_max_, 1.0);
+  nh_private_.param<double>("y_max", y_max_, 1.0);
+  nh_private_.param<double>("z_max", z_max_, 1.0);
   
   sub_pose_ = nh_.subscribe("geomagic_pose", 1, &GeomagicManipulatorTeleoperation::receivePose, this);
   sub_button_ = nh_.subscribe("geomagic_button", 1, &GeomagicManipulatorTeleoperation::receiveButton, this);
-  pub_pose_ = nh_.advertise<geometry_msgs::PoseStamped>("robot_pose", 1);
+  pub_pose_ = nh_.advertise<geometry_msgs::Pose>("robot_pose", 1);
   pub_gripper_ = nh_.advertise<std_msgs::Int32MultiArray>("robot_gripper", 1);
 
   // Initialize gripper message
@@ -57,7 +79,11 @@ GeomagicManipulatorTeleoperation::GeomagicManipulatorTeleoperation()
 
 void GeomagicManipulatorTeleoperation::receivePose(geometry_msgs::PoseStamped pose)
 {
-  pub_pose_.publish(pose);
+  geometry_msgs::Pose robot_pose(pose.pose);
+  robot_pose.position.x = clamp(x_scale_ * (robot_pose.position.x + x_offset_), x_min_, x_max_);
+  robot_pose.position.y = clamp(y_scale_ * (robot_pose.position.y + y_offset_), y_min_, y_max_);
+  robot_pose.position.z = clamp(z_scale_ * (robot_pose.position.z + z_offset_), z_min_, z_max_);
+  pub_pose_.publish(robot_pose);
 }
 
 void GeomagicManipulatorTeleoperation::receiveButton(omni_msgs::OmniButtonEvent button)

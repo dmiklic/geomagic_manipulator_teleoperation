@@ -1,0 +1,17 @@
+# Offsets (added before the scaling)
+x_offset: 0.05
+y_offset: -0.05
+z_offset: -0.07
+
+# Scaling factors
+x_scale: 100.0
+y_scale: 100.0
+z_scale: 100.0
+
+# Limits (enforced after the scaling)
+x_min: -10.0
+x_max: 10.0
+y_min: -10.0
+y_max: 10.0
+z_min: -10.0
+z_max: 10.0
