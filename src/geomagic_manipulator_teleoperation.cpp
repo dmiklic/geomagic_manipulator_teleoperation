@@ -38,7 +38,8 @@ private:
   ros::Subscriber sub_pose_, sub_button_;
   ros::Publisher pub_pose_, pub_gripper_;
 
-  double x_offset_, y_offset_, z_offset_;
+  double x_offset_gm_, y_offset_gm_, z_offset_gm_;
+  double x_offset_robot_, y_offset_robot_, z_offset_robot_;
   double x_scale_, y_scale_, z_scale_;
   double x_min_, y_min_, z_min_;
   double x_max_, y_max_, z_max_;
@@ -50,15 +51,18 @@ GeomagicManipulatorTeleoperation::GeomagicManipulatorTeleoperation()
   : nh_private_("~")
 {
   // Get parameters from the parameter server
-  nh_private_.param<double>("x_offset", x_offset_, 1.0);
-  nh_private_.param<double>("y_offset", y_offset_, 1.0);
-  nh_private_.param<double>("z_offset", z_offset_, 1.0);
+  nh_private_.param<double>("x_offset_gm", x_offset_gm_, 0.0);
+  nh_private_.param<double>("y_offset_gm", y_offset_gm_, 0.0);
+  nh_private_.param<double>("z_offset_gm", z_offset_gm_, 0.0);
+  nh_private_.param<double>("x_offset_robot", x_offset_robot_, 0.0);
+  nh_private_.param<double>("y_offset_robot", y_offset_robot_, 0.0);
+  nh_private_.param<double>("z_offset_robot", z_offset_robot_, 0.0);
   nh_private_.param<double>("x_scale", x_scale_, 1.0);
   nh_private_.param<double>("y_scale", y_scale_, 1.0);
   nh_private_.param<double>("z_scale", z_scale_, 1.0);
-  nh_private_.param<double>("x_min", x_min_, 1.0);
-  nh_private_.param<double>("y_min", y_min_, 1.0);
-  nh_private_.param<double>("z_min", z_min_, 1.0);
+  nh_private_.param<double>("x_min", x_min_, -1.0);
+  nh_private_.param<double>("y_min", y_min_, -1.0);
+  nh_private_.param<double>("z_min", z_min_, -1.0);
   nh_private_.param<double>("x_max", x_max_, 1.0);
   nh_private_.param<double>("y_max", y_max_, 1.0);
   nh_private_.param<double>("z_max", z_max_, 1.0);
@@ -80,9 +84,9 @@ GeomagicManipulatorTeleoperation::GeomagicManipulatorTeleoperation()
 void GeomagicManipulatorTeleoperation::receivePose(geometry_msgs::PoseStamped pose)
 {
   geometry_msgs::Pose robot_pose(pose.pose);
-  robot_pose.position.x = clamp(x_scale_ * (robot_pose.position.x + x_offset_), x_min_, x_max_);
-  robot_pose.position.y = clamp(y_scale_ * (robot_pose.position.y + y_offset_), y_min_, y_max_);
-  robot_pose.position.z = clamp(z_scale_ * (robot_pose.position.z + z_offset_), z_min_, z_max_);
+  robot_pose.position.x = clamp(x_scale_ * (pose.pose.position.x + x_offset_gm_) + x_offset_robot_, x_min_, x_max_);
+  robot_pose.position.y = clamp(y_scale_ * (pose.pose.position.y + y_offset_gm_) + y_offset_robot_, y_min_, y_max_);
+  robot_pose.position.z = clamp(z_scale_ * (pose.pose.position.z + z_offset_gm_) + z_offset_robot_, z_min_, z_max_);
   pub_pose_.publish(robot_pose);
 }
 

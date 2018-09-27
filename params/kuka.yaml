@@ -1,12 +1,17 @@
-# Offsets (added before the scaling)
-x_offset: 0.05
-y_offset: -0.05
-z_offset: -0.07
+# Geomagic offsets (added before the scaling)
+x_offset_gm: 0.05
+y_offset_gm: -0.05
+z_offset_gm: -0.07
 
 # Scaling factors
 x_scale: 100.0
 y_scale: 100.0
 z_scale: 100.0
+
+# Robot offsets (added after the scaling)
+x_offset_robot: 2
+y_offset_robot: -2
+z_offset_robot: 3
 
 # Limits (enforced after the scaling)
 x_min: -10.0
